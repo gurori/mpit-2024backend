@@ -1,22 +1,44 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using mpit.Application.Intefaces.Repositories;
+using mpit.Core.DTO.User;
 using mpit.Core.Models;
 using mpit.DataAccess.DbContexts;
 using mpit.DataAccess.Entities;
 
 namespace mpit.DataAccess.Repositories
 {
-    public sealed class UserRepository(UserDbContext context, IMapper mapper)
-            : BaseRepository<UserDbContext, UserEntity>(context, mapper), 
+    public sealed class UserRepository(ApplicationDbContext context, IMapper mapper)
+            : BaseRepository<ApplicationDbContext, UserEntity>(context, mapper), 
                 IUserRepository
     {
 
-        public async Task<ICollection<User>> GetAll()
+        public async Task<ICollection<User>> GetAllAsync()
         {
             var userEntities = await Entities.ToArrayAsync();
 
             return Mapper.Map<ICollection<User>>(userEntities);
+        }
+
+        public async Task<bool> TryCreateAsync(string email, string firstName, string passwordHash, string role)
+        {
+            bool isUserExist = await Entities
+                .AsNoTracking()
+                .AnyAsync(x => x.Email == email);
+
+            if (isUserExist) return false;
+
+            UserEntity userEntity = new UserEntity()
+            {
+                Email = email,
+                FirstName = firstName,
+                PasswordHash = passwordHash,
+                Role = role
+            };
+
+            await AddAsync(userEntity);
+            await SaveChangesAsync();
+            return true;
         }
     }
 }

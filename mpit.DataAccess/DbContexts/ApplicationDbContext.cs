@@ -3,19 +3,17 @@ using mpit.DataAccess.Entities;
 
 namespace mpit.DataAccess.DbContexts
 {
-    public class UserDbContext(
-        DbContextOptions<UserDbContext> options)
+    public class ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options)
             : BaseDbContext(options)
     {
         public DbSet<UserEntity> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
             ConfigureEntity<UserEntity>(modelBuilder);
-
-            //modelBuilder.ApplyConfiguration(new RolePermissionConfiguration(authOptions.Value));
         }
 
         protected override void ConfigureEntity<T>(ModelBuilder modelBuilder)
@@ -23,12 +21,9 @@ namespace mpit.DataAccess.DbContexts
             base.ConfigureEntity<T>(modelBuilder);
 
             modelBuilder.Entity<UserEntity>()
-                .Property(x => x.UserName)
+                .Property(x => x.FirstName)
                 .IsRequired()
                 .HasMaxLength(64);
-
-            modelBuilder.Entity<UserEntity>()
-                .HasData(new { Id = Guid.NewGuid(), UserName = "Olegushka" });
         }
     }
 }

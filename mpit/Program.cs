@@ -1,8 +1,12 @@
 using mpit.DataAccess.DbContexts;
-using Microsoft.EntityFrameworkCore;
 using mpit.DataAccess.Repositories;
 using mpit.Infastructure.Mapping;
 using mpit.Application.Intefaces.Repositories;
+using mpit.Application.Intefaces.Services;
+using mpit.Application.Services;
+using mpit.Application.Intefaces.Auth;
+using mpit.Infastructure.Auth;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,16 +37,20 @@ services.AddCors(option =>
 
 services.AddScoped<IUserRepository, UserRepository>();
 
+services.AddScoped<IUserService, UserService>();
+
+services.AddScoped<IPasswordHasher, PasswordHasher>();
+
 services.AddAutoMapper(
     typeof(UserAutoMapper));
 
-services.AddDbContext<UserDbContext>(options => 
-    options.UseNpgsql(configuration.GetConnectionString(nameof(UserDbContext))));
+services.AddDbContext<ApplicationDbContext>(options => 
+    options.UseNpgsql(configuration.GetConnectionString(nameof(ApplicationDbContext))));
 
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
-await using var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+await using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 await dbContext.Database.EnsureCreatedAsync();
 
 // Configure the HTTP request pipeline.

@@ -28,7 +28,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: mpit_user_db
+      POSTGRES_DB: mpitdb
       POSTGRES_USER: mpit124
       POSTGRES_PASSWORD: mpit124
     networks:
