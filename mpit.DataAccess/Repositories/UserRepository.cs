@@ -20,13 +20,25 @@ namespace mpit.DataAccess.Repositories
             return Mapper.Map<ICollection<User>>(userEntities);
         }
 
-        public async Task<bool> TryCreateAsync(string email, string firstName, string passwordHash, string role)
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            var user = await Find(x => x.Id == id)
+                .AsNoTracking()
+                .Include(x => x.Vacancies)
+                .FirstOrDefaultAsync();
+
+            if (user is null) return null;
+
+            return Mapper.Map<User>(user);
+        }
+
+        public async Task<Guid?> TryCreateAsync(string email, string firstName, string passwordHash, string role)
         {
             bool isUserExist = await Entities
                 .AsNoTracking()
                 .AnyAsync(x => x.Email == email);
 
-            if (isUserExist) return false;
+            if (isUserExist) return null;
 
             UserEntity userEntity = new UserEntity()
             {
@@ -38,7 +50,7 @@ namespace mpit.DataAccess.Repositories
 
             await AddAsync(userEntity);
             await SaveChangesAsync();
-            return true;
+            return userEntity.Id;
         }
     }
 }

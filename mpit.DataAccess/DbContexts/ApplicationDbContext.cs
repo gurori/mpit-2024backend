@@ -8,6 +8,7 @@ namespace mpit.DataAccess.DbContexts
             : BaseDbContext(options)
     {
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<VacancyEntity> Vacancies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,12 @@ namespace mpit.DataAccess.DbContexts
                 .Property(x => x.FirstName)
                 .IsRequired()
                 .HasMaxLength(64);
+
+            modelBuilder.Entity<UserEntity>()
+                .HasMany(u => u.Vacancies)
+                .WithMany(v => v.Users)
+                .UsingEntity(j => j.ToTable("UserVacancies"));
+
         }
     }
 }

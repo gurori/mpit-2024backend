@@ -16,8 +16,10 @@ namespace mpit.Controllers
         public async Task<IActionResult> Register(CreateUserRequest request) =>
             await TryCatchAsync(async () =>
             {
-                await _userService.RegisterAsync(request);
-                return Ok();
+                Guid id = await _userService.RegisterAsync(request);
+                Response.Cookies.Append("id", id.ToString());
+                Response.Cookies.Append("role", request.Role);
+                return Ok(id);
             });
 
         [HttpGet]
@@ -26,5 +28,12 @@ namespace mpit.Controllers
             await Task.CompletedTask;
             return Ok(await _userService.GetAllAsync());
         }
+
+        [HttpGet("{id:guid}")]
+        public Task<IActionResult> Get(Guid id) =>
+            TryCatchAsync(async () =>
+            {
+                return Ok(await _userService.GetAsync(id));
+            });
     }
 }

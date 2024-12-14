@@ -20,18 +20,25 @@ namespace mpit.Application.Services
             return _userRepo.GetAllAsync();
         }
 
-        public async Task RegisterAsync(CreateUserRequest request)
+        public async Task<User> GetAsync(Guid id)
+        {
+            var user = await _userRepo.GetByIdAsync(id)
+                ?? throw new NotFoundException("Пользователь не найден");
+
+            return user;
+        }
+
+        public async Task<Guid> RegisterAsync(CreateUserRequest request)
         {
             string passwordHash = _passwordHasher.Generate(request.Password);
 
-            bool isCreated = await _userRepo.TryCreateAsync(
+            Guid? id = await _userRepo.TryCreateAsync(
                 request.Email,
                 request.FirstName,
                 passwordHash,
                 request.Role);
 
-            if (!isCreated) 
-                throw new ConflictException("Данный пользователь уже существует");
+            return id is null ? throw new ConflictException("Данный пользователь уже существует") : (Guid)id;
         }
     }
 }
